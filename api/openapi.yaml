@@ -1,111 +1,75 @@
 openapi: "3.0.0"
 info:
   version: 1.0.0
-  title: Swagger Petstore
+  title: MOVI_IO API
   license:
     name: MIT
 servers:
   - url: http://petstore.swagger.io/v1
 paths:
-  /pets:
-    get:
-      summary: List all pets
-      operationId: listPets
-      tags:
-        - pets
-      parameters:
-        - name: limit
-          in: query
-          description: How many items to return at one time (max 100)
-          required: false
-          schema:
-            type: integer
-            format: int32
-      responses:
-        '200':
-          description: A paged array of pets
-          headers:
-            x-next:
-              description: A link to the next page of responses
-              schema:
-                type: string
-          content:
-            application/json:    
-              schema:
-                $ref: "#/components/schemas/Pets"
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+  #OAUTH ENDPOINTS
+  /oauth/login:
     post:
-      summary: Create a pet
-      operationId: createPets
       tags:
-        - pets
-      responses:
-        '201':
-          description: Null response
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-  /pets/{petId}:
+          - oauth
+      summary: usuario faz login e retorna token
+  /oauth/forgot_password:
+    post:
+      tags:
+        - oauth
+      summary: usuario esqueceu a senha
+  /oauth/signin:
+    post:
+      tags:
+        - oauth
+      summary: usuario vai criar uma nova conta
+  /oauth/refresh-token:
+    post:
+      tags:
+        - oauth
+      summary: refresh token do usuario
+  /oauth/token:
     get:
-      summary: Info for a specific pet
-      operationId: showPetById
       tags:
-        - pets
-      parameters:
-        - name: petId
-          in: path
-          required: true
-          description: The id of the pet to retrieve
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Expected response to a valid request
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Pet"
-        default:
-          description: unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+        - oauth
+      summary: teste de api token
+      security:
+        - bearerAuth: []
+  
+  # LIST ENDPOINTS
+  /list:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - list
+      summary: usuario logado cria uma nova lista
+    get:
+      tags:
+        - list
+      summary: retorna todas as listas criadas pelo usuario logado
+      security:
+        - bearerAuth: []
+  /list/{listId}:
+    put:
+      tags:
+          - list
+          - listById
+      summary: edita uma lista 
+    get:
+      tags:
+        - list
+        - listById
+      summary: retorna uma lista
+    delete:
+      tags:
+        - list
+        - listById
+      summary: apaga uma lista
+
 components:
-  schemas:
-    Pet:
-      type: object
-      required:
-        - id
-        - name
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
-        tag:
-          type: string
-    Pets:
-      type: array
-      items:
-        $ref: "#/components/schemas/Pet"
-    Error:
-      type: object
-      required:
-        - code
-        - message
-      properties:
-        code:
-          type: integer
-          format: int32
-        message:
-          type: string
+  securitySchema:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: jwt
